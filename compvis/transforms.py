@@ -1,7 +1,8 @@
 """
-Geometric transformations.
+Geometric transformations described Szeliski 2011, section 2.1.2.
 
-See Szeliski section 2.1.2.
+In general, the functions take inhomogeneous vectors as input, except for
+particular transforms that act on homogeneous coordinates (e.g. homography).
 """
 
 import numpy as np
@@ -11,6 +12,7 @@ def translate(x, t):
     """
     Translates a vector of arbitrary dimension.
     """
+    # Convert to numpy arrays if necessary
     if not isinstance(x, np.ndarray):
         x = np.array(x)
     if not isinstance(t, np.ndarray):
@@ -23,16 +25,17 @@ def euclidean_2d(x, theta, t):
     Performs a 2D Euclidean transformation (i.e. rotation and translation,
     a.k.a. rigid body motion.
     """
-    # Check if x and t have the correct dimension
-    if len(x) != 2 or len(t) != 2:
-        print >> sys.stderr, "x and t must be 2D"
-        return
-
     # Convert to numpy arrays if necessary
     if not isinstance(x, np.ndarray):
         x = np.array(x)
     if not isinstance(t, np.ndarray):
         t = np.array(t)
+
+    # Check if x and t have the correct dimension
+    if x.shape != (2, ):
+        raise ValueError("x must be 2D")
+    if t.shape != (2, ):
+        raise ValueError("t must be 2D")
 
     # Augmented vector
     x_aug = np.append(x, 1)
@@ -50,16 +53,17 @@ def similarity_2d(x, s, theta, t):
     """
     Performs a 2D similarity transform (i.e. scaled rotation).
     """
-    # Check if x and t have the correct dimension
-    if len(x) != 2 or len(t) != 2:
-        print >> sys.stderr, "x and t must be 2D"
-        return
-
     # Convert to numpy arrays if necessary
     if not isinstance(x, np.ndarray):
         x = np.array(x)
     if not isinstance(t, np.ndarray):
         t = np.array(t)
+
+    # Check if x and t have the correct dimension
+    if x.shape != (2, ):
+        raise ValueError("x must be 2D")
+    if t.shape != (2, ):
+        raise ValueError("t must be 2D")
 
     # Augmented vector
     x_aug = np.append(x, 1)
@@ -84,9 +88,10 @@ def similarity_2d_alt(x, a, b, t):
         t = np.array(t)
     
     # Check if x and t have the correct dimension
-    if x.shape[0] != 2 or t.shape[0] != 2:
-        print >> sys.stderr, "x and t must be 2D"
-        return
+    if x.shape != (2, ):
+        raise ValueError("x must be 2D")
+    if t.shape != (2, ):
+        raise ValueError("t must be 2D")
 
     # Augmented vector
     x_aug = np.append(x, 1)
@@ -109,24 +114,35 @@ def affine_2d(x, A):
 
     # Check if x has correct dimension
     if x.shape[0] != 2:
-        print >> sys.stderr, "x must be 2D"
+        raise ValueError("x must be 2D")
     # Check if A has correct dimensions
     if A.shape != (2, 3):
-        print >> sys.stderr, "A must be a 2 x 3 matrix"
+        raise ValueError("A must be 2 x 3 matrix")
 
     # Augmented vector
     x_aug = np.append(x, 1)
 
     return np.dot(A, x_aug)
 
-def homography_2d(x, H):
-    return
+def homography_2d(x_hom, H_hom):
+    # Convert to numpy arrays if necessary
+    if not isinstance(x, np.ndarray):
+        x = np.array(x)
+    if not isinstance(H, np.ndarray):
+        H = np.array(H)
 
-if __name__ == '__main__':
-    print translate((1, 2), (3, 4))
-    print euclidean_2d((1, 2), np.pi / 4, (3, 4))
-    print similarity_2d((1, 2), 5, np.pi / 4, (3, 4))
-    print similarity_2d_alt((1, 2), 5, 6, (3, 4))
-    A = ((3, 4, 5),
-         (6, 7, 8))
-    print affine_2d((1, 2), A)
+    # Check if x and H have the correct dimensions
+    if x_hom.shape[0] != 3:
+        raise ValueError("x_hom must be 3D (projective)")
+    if H_hom.shape != (3, 3):
+        raise ValueError("H_hom must be 3 x 3 matrix")
+    
+    xp_hom = np.dot(H_hom, x_hom)
+    # Get the augmented vector
+    x_aug = utils.hom_to_aug(x_hom)
+
+    # Normalize to inhomogeneous coordinates
+    xp = np.array((np.dot(H[0], x_aug) / np.dot(H[2], x_aug),
+                   np.dot(H[1], x_aug) / np.dot(H[2], x_aug)))
+
+    return xp

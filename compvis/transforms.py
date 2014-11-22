@@ -150,3 +150,19 @@ def planar_surface_flow(x, a):
 
     return np.array((np.dot(a[[0, 1, 2, 6, 7]], tmp),
                      np.dot(a[[3, 4, 5, 7, 6]], tmp)))
+
+def bilinear_interpolant(x, a):
+    # Convert to numpy arrays if necessary
+    if not isinstance(x, np.ndarray): x = np.array(x)
+    if not isinstance(a, np.ndarray): a = np.array(a)
+
+    # Check for correct dimensions
+    if x.shape != (2, ): raise ValueError("x must be 2D")
+    if a.shape != (8, ): raise ValueError("a must be 8D")
+
+    tmp = np.array((1, x[0], x[1], x[0]*x[1]))
+
+    return np.array((np.dot(a[[0, 1, 2, 6]], tmp),
+                     np.dot(a[[3, 4, 5, 7]], tmp)))
+
+

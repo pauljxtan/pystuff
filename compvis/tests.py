@@ -67,6 +67,14 @@ class TestTransforms(unittest.TestCase):
         result = tr.planar_surface_flow(x, a_psf)
         self.assertTrue((np.abs(expected - result) < epsilon).all())
 
+        # Bilinear interpolant
+        expected = np.array((a_psf[0] + a_psf[1]*x[0] + a_psf[2]*x[1]
+                             + a_psf[6]*x[0]*x[1],
+                             a_psf[3] + a_psf[4]*x[0] + a_psf[5]*x[1]
+                             + a_psf[7]*x[0]*x[1]))
+        result = tr.bilinear_interpolant(x, a_psf)
+        self.assertTrue((np.abs(expected - result) < epsilon).all())
+
 if __name__ == '__main__':
     unittest.main()
 

@@ -1,5 +1,5 @@
 """
-Geometric transformations described Szeliski 2011, section 2.1.2.
+Geometric transformations described Szeliski 2011, section 2.1.
 
 In general, the functions take inhomogeneous vectors as input, except for
 particular transforms that act on homogeneous coordinates (e.g. homography).
@@ -137,10 +137,8 @@ def affine_2d(x, A):
 
 def homography_2d(x_hom, H_hom):
     # Convert to numpy arrays if necessary
-    if not isinstance(x, np.ndarray):
-        x = np.array(x)
-    if not isinstance(H, np.ndarray):
-        H = np.array(H)
+    if not isinstance(x, np.ndarray): x = np.array(x)
+    if not isinstance(H, np.ndarray): H = np.array(H)
 
     # Check for correct dimensions
     if x_hom.shape != (3, ): raise ValueError("x_hom must be 3D")
@@ -248,7 +246,7 @@ def euclidean_3d_quaternion(x, q, t):
     """
     # Convert to numpy arrays if necessary
     if not isinstance(x, np.ndarray): x = np.array(x)
-    if not isinstance(q, np.ndarray): q = np.array(n)
+    if not isinstance(q, np.ndarray): q = np.array(q)
     if not isinstance(t, np.ndarray): t = np.array(t)
 
     # Check for correct dimensions
@@ -289,10 +287,8 @@ def affine_3d(x, A):
 
 def homography_3d(x_hom, H_hom):
     # Convert to numpy arrays if necessary
-    if not isinstance(x, np.ndarray):
-        x = np.array(x)
-    if not isinstance(H, np.ndarray):
-        H = np.array(H)
+    if not isinstance(x, np.ndarray): x = np.array(x)
+    if not isinstance(H, np.ndarray): H = np.array(H)
 
     # Check for correct dimensions
     if x_hom.shape != (4, ): raise ValueError("x_hom must be 4D")
@@ -306,3 +302,72 @@ def homography_3d(x_hom, H_hom):
     return np.array((np.dot(H[0], x_aug) / np.dot(H[3], x_aug),
                      np.dot(H[1], x_aug) / np.dot(H[3], x_aug),
                      np.dot(H[2], x_aug) / np.dot(H[3], x_aug)))
+
+##################################### 3D TO 2D PROJECTIONS #####################################
+
+def orthography(p):
+    # Convert to numpy array if necessary
+    if not isinstance(p, np.ndarray): p = np.array(p)
+
+    # Check for correct dimensions
+    if p.shape != (3, ): raise ValueError("p must be 3D")
+
+    A = np.concatenate((np.identity(2), np.zeros(2).reshape(2, 1)), axis=1)
+
+    return np.dot(A, p)
+
+def orthography_hom(p_hom):
+    # Convert to numpy array if necessary
+    if not isinstance(p, np.ndarray): p = np.array(p)
+
+    # Check for correct dimensions
+    if p.shape != (4, ): raise ValueError("p_hom must be 4D")
+
+    A = np.concatenate((np.identity(3)[:,:2], np.zeros(3).reshape(3, 1), np.identity(3)[:,2]), axis=1)
+
+    return np.dot(A, p_hom)
+
+def orthography_scaled(p, s):
+    # Convert to numpy array if necessary
+    if not isinstance(p, np.ndarray): p = np.array(p)
+
+    # Check for correct dimensions
+    if p.shape != (3, ): raise ValueError("p must be 3D")
+
+    A = s * np.concatenate((np.identity(2), np.zeros(2).reshape(2, 1)), axis=1)
+
+    return np.dot(A, p)
+
+def para_perspective(p_hom, A):
+    # Convert to numpy arrays if necessary
+    if not isinstance(p_hom, np.ndarray): p_hom = np.array(p_hom)
+    if not isinstance(A, np.ndarray): A = np.array(A)
+
+    # Check for correct dimensions
+    if p_hom.shape != (4, ): raise ValueError("p_hom must be 4D")
+    if A.shape != (2, 4): raise ValueError("A must be 2 x 4 matrix")
+    
+    B = np.concatenate((A, np.array((0, 0, 0, 1))))
+
+    return np.dot(B, p_hom)
+
+def perspective(p):
+    # Convert to numpy array if necessary
+    if not isinstance(p, np.ndarray): p = np.array(p)
+
+    # Check for correct dimensions
+    if p.shape != (3, ): raise ValueError("p must be 3D")
+
+    return np.array((p[0]/p[2], p[1]/p[2], 1))
+
+def perspective_hom(p_hom):
+    # Convert to numpy array if necessary
+    if not isinstance(p_hom, np.ndarray): p_hom = np.array(p_hom)
+
+    # Check for correct dimensions
+    if p_hom.shape != (4, ): raise ValueError("p_hom must be 4D")
+
+    A = np.concatenate((np.identity(3), np.zeros(3).reshape(3, 1)), axis=1)
+
+    return np.dot(A, p_hom)
+

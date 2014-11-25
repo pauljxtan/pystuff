@@ -182,7 +182,7 @@ def euclidean_3d(x, n, theta, t):
     """
     # Convert to numpy arrays if necessary
     if not isinstance(x, np.ndarray): x = np.array(x)
-    if not isinstance(n, np.ndarray): x = np.array(n)
+    if not isinstance(n, np.ndarray): n = np.array(n)
     if not isinstance(t, np.ndarray): t = np.array(t)
 
     # Check for correct dimensions
@@ -202,6 +202,43 @@ def euclidean_3d(x, n, theta, t):
                         (-n[1],  n[0],  0   )))
     # Rotation matrix
     R = np.identity(3) + np.sin(theta)*n_cross + (1-np.cos(theta))*n_cross**2
+
+    # Rotation + translation matrix
+    Rt = np.concatenate((R, t.reshape(3, 1)), axis=1)
+
+    return np.dot(Rt, x_aug)
+
+def euclidean_3d_quaternion(x, q, t):
+    """
+    Performs a 3D Euclidean transformation (i.e. rotation and translation,
+    a.k.a. rigid body motion.
+
+    Parameters :
+        x      : vector
+        q      : (unit) quaternion
+        t      : translation
+    """
+    # Convert to numpy arrays if necessary
+    if not isinstance(x, np.ndarray): x = np.array(x)
+    if not isinstance(q, np.ndarray): q = np.array(n)
+    if not isinstance(t, np.ndarray): t = np.array(t)
+
+    # Check for correct dimensions
+    if x.shape != (3, ): raise ValueError("x must be 3D")
+    if q.shape != (4, ): raise ValueError("n must be 3D")
+    if t.shape != (3, ): raise ValueError("t must be 3D")
+
+    # Augmented vector
+    x_aug = np.append(x, 1)
+
+    # Rotation matrix R(q)
+    qx = q[0]
+    qy = q[1]
+    qz = q[2]
+    qw = q[3]
+    R = np.array((1-2*(qy*qy+qz*qz),   2*(qx*qy-qz*qw),   2*(qx*qz+qy*qw)),
+                 (  2*(qx*qy+qz*qw), 1-2*(qx*qx+qz*qz),   2*(qy*qz-qx*qw)),
+                 (  2*(qx*qz-qy*qw),   2*(qy*qz+qx*qw), 1-2*(qx*qx+qy*qy)))
 
     # Rotation + translation matrix
     Rt = np.concatenate((R, t.reshape(3, 1)), axis=1)

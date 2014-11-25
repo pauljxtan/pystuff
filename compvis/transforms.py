@@ -201,9 +201,7 @@ def euclidean_3d(x, n, theta, t):
                         ( n[2],  0,    -n[0]),
                         (-n[1],  n[0],  0   )))
     # Rotation matrix
-    R = np.identity(3) + np.sin(theta)*n_cross + (1-p.cos(theta))*n_cross**2
-    R = np.array(((np.cos(theta), -np.sin(theta)),
-                  (np.sin(theta),  np.cos(theta))))
+    R = np.identity(3) + np.sin(theta)*n_cross + (1-np.cos(theta))*n_cross**2
 
     # Rotation + translation matrix
     Rt = np.concatenate((R, t.reshape(3, 1)), axis=1)

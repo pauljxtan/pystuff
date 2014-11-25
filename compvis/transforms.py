@@ -17,6 +17,34 @@ def translate(x, t):
     if not isinstance(t, np.ndarray): t = np.array(t)
 
     return x + t
+
+def slerp(q0, q1, alpha):
+    """
+    Performs spherical linear interpolation between two quaternions.
+
+    Parameters :
+        q0, q1 : quaternions
+        alpha  : fraction to interpolate
+    """
+    # Convert to numpy arrays if necessary
+    if not isinstance(q0, np.ndarray): q0 = np.array(q0)
+    if not isinstance(q1, np.ndarray): q1 = np.array(q1)
+
+    # Check for correct dimensions
+    if q0.shape != (4, ): raise ValueError("q0 must be 4D")
+    if q1.shape != (4, ): raise ValueError("q1 must be 4D")
+
+    qr = q1 / q0
+    vr = qr[:3]
+    wr = qr[3]
+    if (wr < 0): qr = -qr
+
+    theta_r = 2 * np.arctan(np.linalg.norm(vr) / wr)
+    nr = vr / np.linalgnorm(vr)
+    theta_alpha = alpha * theta_r
+    q_alpha = np.array((np.sin(theta_alpha/2) * nr, np.cos(theta_alpha/2)))
+
+    return q_alpha * q0
     
 ################################ 2D TRANSFORMS ################################
 
@@ -225,7 +253,7 @@ def euclidean_3d_quaternion(x, q, t):
 
     # Check for correct dimensions
     if x.shape != (3, ): raise ValueError("x must be 3D")
-    if q.shape != (4, ): raise ValueError("n must be 3D")
+    if q.shape != (4, ): raise ValueError("q must be 4D")
     if t.shape != (3, ): raise ValueError("t must be 3D")
 
     # Augmented vector

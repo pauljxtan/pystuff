@@ -14,3 +14,13 @@ def hom_to_aug(x_hom):
 
     # Divide through by the last element to get the augmented vector
     return x_hom / x_hom[-1]
+
+def focal_length(W, theta):
+    """
+    Returns the focal length of the camera.
+
+    Parameters :
+        W      : sensor width
+        theta  : field of view
+    """
+    return W / 2 / np.tan(theta / 2)

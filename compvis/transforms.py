@@ -198,7 +198,7 @@ def bilinear_interpolant(x, a):
 def euclidean_3d(x, n, theta, t):
     """
     Performs a 3D Euclidean transformation (i.e. rotation and translation,
-    a.k.a. rigid body motion.
+    a.k.a. rigid body motion.)
 
     Parameters :
         x      : vector
@@ -371,3 +371,59 @@ def perspective_hom(p_hom):
 
     return np.dot(A, p_hom)
 
+def calibration_matrix(f, c, a, s):
+    return np.array((f,   s, c[0]),
+                    (0, a*f, c[1]),
+                    (0,   0,    1))
+
+def calibration_matrix_4x4(f, c, a, s):
+    return np.array((f,   s, c[0], 0),
+                    (0, a*f, c[1], 0),
+                    (0,   0,    1, 0))
+                    (0,   0,    0, 1))
+
+def camera_matrix(K, R, t):
+    # Convert to numpy arrays if necessary
+    if not isinstance(K, np.ndarray): K = np.array(K)
+    if not isinstance(R, np.ndarray): R = np.array(R)
+    if not isinstance(t, np.ndarray): t = np.array(t)
+
+    # Check for correct dimensions
+    if K.shape != (3, 3): raise ValueError("K must be 3 x 3 matrix")
+    if R.shape != (3, 3): raise ValueError("R must be 3 x 3 matrix")
+    if t.shape != (3, ): raise ValueError("t must be 3D")
+
+    E = np.concatenate((R, t.reshape(3, 1)), axis=1)
+
+    return np.dot(K, E)
+
+def camera_matrix_4x4(K_4x4, R, t):
+    # Convert to numpy arrays if necessary
+    if not isinstance(K_4x4, np.ndarray): K_4x4 = np.array(K_4x4)
+    if not isinstance(R, np.ndarray): R = np.array(R)
+    if not isinstance(t, np.ndarray): t = np.array(t)
+
+    # Check for correct dimensions
+    if K_4x4.shape != (4, 4): raise ValueError("K_4x4 must be 4 x 4 matrix")
+    if R.shape != (3, 3): raise ValueError("R must be 3 x 3 matrix")
+    if t.shape != (3, ): raise ValueError("t must be 3D")
+
+    E_4x4 = np.concatenate((np.concatenate((R, t.reshape(3,1)), axis=1), np.array((0, 0, 0, 1))))
+
+    return np.dot(K_4x4, E_4x4)
+
+def world_to_screen_with_disparity(P_4x4, p_w):
+    # Convert to numpy arrays if necessary
+    if not isinstance(P_4x4, np.ndarray): P_4x4 = np.array(P_4x4)
+    if not isinstance(p_w, np.ndarray): p_w = np.array(p_w)
+
+    # Check for correct dimensions
+    if P_4x4.shape != (4, 4): raise ValueError("P_4x4 must be 4 x 4 matrix")
+    if p_w.shape != (3, ): raise ValueError("p_w must be 3D")
+
+    p_w_aug = np.append(p_w, 1)
+
+    x_s = np.dot(P_4x4, p_w_aug)
+
+    # Normalize to (x_s, x_y, 1, d)
+    return x_s / x_s[2]

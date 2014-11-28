@@ -4,7 +4,9 @@ Image processing (Szeliski Ch. 3)
 
 import numpy as np
 
-####################################### PIXEL TRANSFORMS #######################################
+RANGE_8BIT = 2**8
+
+############################## PIXEL TRANSFORMS ##############################
 
 def gain_bias(f, x, gain, bias):
     return gain * f(x) + bias
@@ -18,19 +20,25 @@ def gamma_correction(f, x, gamma):
     """
     return f(x)**(1.0 / gamma)
 
-##################################### COMPOSITING & MATTING #####################################
+############################ COMPOSITING & MATTING ############################
 
 def over_operator(B, F, alpha):
     return (1 - alpha) * B + alpha * F
 
-#################################### HISTOGRAM EQUALIZATION ####################################
+########################### HISTOGRAM EQUALIZATION ###########################
 
-def ahe_8bit(img):
-    h = np.histogram(img, bins=256, range=(0, 255))
-    c = np.cumsum(h)
+def histogram_equalization_8bit(img):
+    """
+    Does not apply directly to RGB images; convert to other color space first
+    """
+    # Histogram
+    hist, bins = np.histogram(img, bins=RANGE_8BIT)
+    # Cumulative distribution function
+    cdf = hist.cumsum().astype(float)
+    # Normalize CDF
+    cdf = cdf / cdf[-1] * (RANGE_8BIT - 1)
 
+    # Interpolate new image
+    img_eq = np.interp(img, bins[:-1], cdf)
 
-
-
-
-    
+    return img_eq

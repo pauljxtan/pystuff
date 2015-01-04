@@ -3,8 +3,9 @@ Image processing (Szeliski Ch. 3)
 """
 
 import numpy as np
+import scipy.ndimage.filters as filt
 
-RANGE_8BIT = 2**8
+#RANGE_8BIT = 2**8
 
 ############################## PIXEL TRANSFORMS ##############################
 
@@ -27,18 +28,41 @@ def over_operator(B, F, alpha):
 
 ########################### HISTOGRAM EQUALIZATION ###########################
 
-def histogram_equalization_8bit(img):
+def histogram_equalization(img, bits):
     """
-    Does not apply directly to RGB images; convert to other color space first
+    Don't apply directly to RGB images; convert to other color space first
     """
     # Histogram
-    hist, bins = np.histogram(img, bins=RANGE_8BIT)
+    hist, bins = np.histogram(img, bins=2**bits)
     # Cumulative distribution function
     cdf = hist.cumsum().astype(float)
     # Normalize CDF
-    cdf = cdf / cdf[-1] * (RANGE_8BIT - 1)
+    cdf = cdf / cdf[-1] * (2**bits - 1)
 
     # Interpolate new image
     img_eq = np.interp(img, bins[:-1], cdf)
 
     return img_eq
+
+############################### BORDER PADDING ###############################
+
+# These functions are kinda redundant but I'll just leave them for reference
+
+def pad_const(img, pad_width, value):
+    img_pad = np.pad(img, pad_width, mode='constant', constant_values=value)
+    return img_pad
+
+def pad_clamp(img, pad_width):
+    img_pad = np.pad(img, pad_width, mode='edge')
+    return img_pad
+
+def pad_wrap(img, pad_width):
+    img_pad = np.pad(img, pad_width, mode='wrap')
+    return img_pad
+
+def pad_mirror(img, pad_width):
+    img_pad = np.pad(img, pad_width, mode='reflect')
+    return img_pad
+
+#def pad_extend(img, pad_width):
+#    return img

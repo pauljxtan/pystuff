@@ -2,7 +2,7 @@ import numpy as np
 import random
 import unittest
 
-import transforms as tr
+import compvis.imgform.transforms as tr
 
 class TestTransforms(unittest.TestCase):
 

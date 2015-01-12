@@ -379,7 +379,7 @@ def calibration_matrix(f, c, a, s):
 def calibration_matrix_4x4(f, c, a, s):
     return np.array((f,   s, c[0], 0),
                     (0, a*f, c[1], 0),
-                    (0,   0,    1, 0))
+                    (0,   0,    1, 0),
                     (0,   0,    0, 1))
 
 def camera_matrix(K, R, t):

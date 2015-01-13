@@ -34,7 +34,7 @@ def pyramids(img, levels):
     G = [img, ]
     L = []
 
-    for level in range(levels - 1):
+    for level in range(levels):
         # Blur
         img_blur = sig.convolve2d(img, kernels.KERNEL_GAUSSIAN, 'same')
 
@@ -42,7 +42,7 @@ def pyramids(img, levels):
         L.append(img - img_blur)
         
         # Downsample at r=2
-        img = img[::2, ::2]
+        img = img_blur[::2, ::2]
 
         # Add to Gaussian pyramid
         G.append(img)

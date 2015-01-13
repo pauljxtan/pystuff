@@ -7,7 +7,7 @@ from compvis.imgproc.filters import kernels
 
 def interpolate(img):
     """
-    Interpolate an image with upsampling rate r=2.
+    Interpolates an image with upsampling rate r=2.
     """
     img_up = np.zeros((2*img.shape[0], 2*img.shape[1]))
 
@@ -19,7 +19,7 @@ def interpolate(img):
 
 def decimate(img):
     """
-    Decimate an image with downsampling rate r=2.
+    Decimates an image with downsampling rate r=2.
     """
     # Blur
     img_blur = sig.convolve2d(img_down, kernels.KERNEL_GAUSSIAN, 'same')
@@ -27,10 +27,24 @@ def decimate(img):
     # Downsample
     return img_blur[::2, ::2]
 
-def gaussian_pyramid(img, levels):
+def pyramids(img, levels):
+    """
+    Constructs Gaussian and Laplacian pyramids.
+    """
     G = [img, ]
+    L = []
 
     for level in range(levels - 1):
-        G.append(decimate(G[-1]))
+        # Blur
+        img_blur = sig.convolve2d(img, kernels.KERNEL_GAUSSIAN, 'same')
 
-    return G
+        # Subtract from original and add to Laplacian pyramid
+        L.append(img - img_blur)
+        
+        # Downsample at r=2
+        img = img[::2, ::2]
+
+        # Add to Gaussian pyramid
+        G.append(img)
+
+    return G, L

@@ -47,4 +47,4 @@ def pyramids(img, levels):
         # Add to Gaussian pyramid
         G.append(img)
 
-    return G, L
+    return np.array(G), np.array(L)

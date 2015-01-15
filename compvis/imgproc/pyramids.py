@@ -31,7 +31,7 @@ def pyramids(img, levels):
     """
     Constructs Gaussian and Laplacian pyramids.
     """
-    G = [img, ]
+    G = []
     L = []
 
     for level in range(levels):
@@ -47,4 +47,4 @@ def pyramids(img, levels):
         # Add to Gaussian pyramid
         G.append(img)
 
-    return np.array(G), np.array(L)
+    return G, L

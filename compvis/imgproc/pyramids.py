@@ -14,8 +14,8 @@ def interpolate(img):
     # Upsample
     img_up[::2, ::2] = img
 
-    # Blur (need to scale by 2 since kernel has unit area)
-    return sig.convolve2d(img_up, 2*kernels.KERNEL_GAUSSIAN, 'same')
+    # Blur (need to scale up since kernel has unit area)
+    return sig.convolve2d(img_up, 4*kernels.KERNEL_GAUSSIAN, 'same')
 
 def decimate(img):
     """
@@ -31,7 +31,7 @@ def pyramids(img, levels):
     """
     Constructs Gaussian and Laplacian pyramids.
     """
-    G = []
+    G = [img, ]
     L = []
 
     for level in range(levels):
@@ -46,5 +46,8 @@ def pyramids(img, levels):
 
         # Add to Gaussian pyramid
         G.append(img)
+
+    #L.append(None)
+    L.append(G[-1])
 
     return G, L

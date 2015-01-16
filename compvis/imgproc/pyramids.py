@@ -27,14 +27,14 @@ def decimate(img):
     # Downsample
     return img_blur[::2, ::2]
 
-def pyramids(img, levels):
+def pyramids(img):
     """
     Constructs Gaussian and Laplacian pyramids.
     """
     G = [img, ]
     L = []
 
-    for level in range(levels):
+    while img.shape[0] >= 2 and img.shape[1] >= 2:
         # Blur
         img_blur = sig.convolve2d(img, kernels.KERNEL_GAUSSIAN, 'same')
 
@@ -47,7 +47,4 @@ def pyramids(img, levels):
         # Add to Gaussian pyramid
         G.append(img)
 
-    #L.append(None)
-    L.append(G[-1])
-
-    return G, L
+    return G[:-1], L

@@ -44,3 +44,18 @@ def pyramids(img):
         L.append(G[i] - interpolate(G[i + 1]))
 
     return G[:-1], L
+
+def blend_pyramids(L_1, L_2, G_mask):
+    return ([L_1[i] * (1.0 - G_mask[i]) + L_2[i] * G_mask[i]
+             for i in range(len(G_mask))])
+
+def reconstruct(L):
+    """
+    Reconstructs an image from a Laplacian pyramid.
+    """
+    # Interpolate all levels to the same size
+    for i in range(len(L)):
+        for j in range(i):
+            L[i] = interpolate(L[i])
+
+    return np.sum(L, axis=0)

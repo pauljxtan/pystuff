@@ -22,7 +22,7 @@ def decimate(img):
     Decimates an image with downsampling rate r=2.
     """
     # Blur
-    img_blur = sig.convolve2d(img_down, kernels.KERNEL_GAUSSIAN, 'same')
+    img_blur = sig.convolve2d(img, kernels.KERNEL_GAUSSIAN, 'same')
 
     # Downsample
     return img_blur[::2, ::2]
@@ -34,17 +34,13 @@ def pyramids(img):
     G = [img, ]
     L = []
 
+    # Build the Gaussian pyramid
     while img.shape[0] >= 2 and img.shape[1] >= 2:
-        # Blur
-        img_blur = sig.convolve2d(img, kernels.KERNEL_GAUSSIAN, 'same')
-
-        # Subtract from original and add to Laplacian pyramid
-        L.append(img - img_blur)
-        
-        # Downsample at r=2
-        img = img_blur[::2, ::2]
-
-        # Add to Gaussian pyramid
+        img = decimate(img)
         G.append(img)
+
+    # Build the Laplacian pyramid
+    for i in range(len(G) - 1):
+        L.append(G[i] - interpolate(G[i + 1]))
 
     return G[:-1], L

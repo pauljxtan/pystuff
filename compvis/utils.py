@@ -24,3 +24,14 @@ def focal_length(W, theta):
         theta  : field of view
     """
     return W / 2 / np.tan(theta / 2)
+
+def clip_min_max(img, val_min, val_max):
+    """
+    Clips the signal at the specified limits.
+    """
+    img[img < val_min] = val_min
+    img[img > val_max] = val_max
+
+    return img
+
+

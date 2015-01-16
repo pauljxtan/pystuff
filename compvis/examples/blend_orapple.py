@@ -7,9 +7,9 @@ from compvis.imgproc.pyramids import pyramids, blend_pyramids, reconstruct
 
 # Load images into numpy arrays
 print "Loading images..."
-apple = np.array(Image.open("apple1.jpg"))
-orange = np.array(Image.open("orange1.jpg"))
-mask = np.array(Image.open("mask512.jpg"))
+apple = np.array(Image.open("apple_512.jpg"))
+orange = np.array(Image.open("orange_512.jpg"))
+mask = np.array(Image.open("mask_512.jpg"))
 
 # Normalize mask to [0, 1]
 mask /= 255.0

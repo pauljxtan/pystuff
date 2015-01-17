@@ -34,4 +34,13 @@ def clip_min_max(img, val_min, val_max):
 
     return img
 
+def get_patch(img, x, y, x_len, y_len):
+    """
+    Extract a patch from an image with top-left corner at (x, y) and 
+    size x_len by y_len.
+    """
+    patch = np.empty((x_len, y_len))
+    for row in range(patch.shape[0]):
+        patch[row] = img[x + row, y : y + patch.shape[1]]
 
+    return patch

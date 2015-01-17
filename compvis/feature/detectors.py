@@ -17,7 +17,7 @@ def wssd(img_0, img_1, u, w):
     E = 0.0
     for x in range(img_0.shape[0]):
         for y in range(img_0.shape[1]):
-            E += w[x, y] * (img_1[x+u[0], y+u[1]]] - img_0[x, y])**2
+            E += w[x, y] * (img_1[x+u[0], y+u[1]] - img_0[x, y])**2
 
     return E
 

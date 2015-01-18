@@ -20,17 +20,41 @@ def sum_sq_diff(img_0, img_1, u, x, y, x_len, y_len):
 
     return np.sum((patch_1 - patch_0)**2)
 
-def autocorr(img, delta_u, x, y, x_len, y_len):
+def autocorr(img, u, x, y, x_len, y_len):
     """
     Computes the auto-correlation function for an image patch with a
-    displacement of delta_u. Uses even weighting across the patch.
+    displacement of u. Uses even weighting across the patch.
     (Just for reference, since this is sum_sq_diff() with both images being
     the same.)
 
     Parameters :
         img          : image
-        delta_u      : variation in position
+        u            : variation in position
         x, y         : coordinates of top-left corner of patch
         x_len, y_len : width and height of patch
     """
-    return sum_sq_diff(img, img, delta_u, x, y, x_len, y_len)
+    return sum_sq_diff(img, img, u, x, y, x_len, y_len)
+
+def autocorr_surface(img, u_x_range, u_y_range, x, y, x_len, y_len):
+    """
+    Computes an auto-correlation surface for an image patch with a given range
+    of displacements.
+
+    Parameters :
+        img                  : image
+        u_x_range, u_y_range : range of displacements (tuples)
+        x, y                 : coordinates of top-left corner of patch
+        x_len, y_len         : width and height of patch
+
+    Returns :
+        X, Y : grid mesh
+        Z    : auto-correlation values
+    """
+    X, Y = np.meshgrid(range(u_x_range[0], u_x_range[1]),
+                       range(u_y_range[0], u_y_range[1]))
+
+    z = np.array([autocorr(img, (u_x, u_y), x, y, x_len, y_len) 
+                  for u_x, u_y in zip(np.ravel(X), np.ravel(Y))])
+    Z = z.reshape(X.shape)
+
+    return X, Y, Z

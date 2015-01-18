@@ -6,6 +6,8 @@ This library is mostly for my own learning purposes, since I find I understand c
 
 ### Modules ###
 * __examples__: Example scripts
+* __feature__: Feature detection and matching
+  * __detectors.py__: Feature detectors
 * __imgform__: Image formation (Szeliski chapter 2)
   * __color.py__: Color spaces
   * __transforms.py__: Geometric transformations
@@ -21,3 +23,4 @@ This library is mostly for my own learning purposes, since I find I understand c
 
 ### Dependencies ###
 * __numpy__
+* __scipy__

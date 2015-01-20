@@ -5,7 +5,7 @@ import numpy as np
 import scipy.signal as sig
 import scipy.ndimage as ndi
 from compvis.utils import get_patch
-from compvis.imgproc.filters.kernels import KERNEL_GAUSSIAN
+from compvis.imgproc.filters.kernels import KERNEL_GAUSSIAN, gaussian_kernel
 
 def sum_sq_diff(img_0, img_1, u, x, y, x_len, y_len):
     """
@@ -62,15 +62,23 @@ def autocorr_surface(img, u_x_range, u_y_range, x, y, x_len, y_len):
 
     return X, Y, Z
 
-def harris(img, sigma_d=1, sigma_i=2, alpha=0.06):
+def harris(img, sigma_d=1, sigma_i=2, alpha=0.06, filter_type='gaussian'):
     """
     Returns the Harris interest scores for keypoint detection.
     (Default values for sigma_d and sigma_i from Szeliski pp. 190)
     (Default value for alpha from Szeliski pp. 189)
     """
     # Gradients in x and y
-    I_x = ndi.gaussian_filter(img, sigma_d, (1, 0))
-    I_y = ndi.gaussian_filter(img, sigma_d, (0, 1))
+
+    # Derivative of Gaussian
+    if filter_type is 'gaussian':
+        I_x = ndi.gaussian_filter(img, sigma_d, (1, 0))#, mode='nearest')
+        I_y = ndi.gaussian_filter(img, sigma_d, (0, 1))#, mode='nearest')
+
+    # Sobel
+    elif filter_type is 'sobel':
+        I_x = ndi.sobel(img, 0)
+        I_y = ndi.sobel(img, 1)
 
     # Outer products
     I_xx = I_x**2
@@ -82,34 +90,81 @@ def harris(img, sigma_d=1, sigma_i=2, alpha=0.06):
     A_yy = ndi.gaussian_filter(I_yy, sigma_i)
     A_xy = ndi.gaussian_filter(I_xy, sigma_i)
 
+    #kernel = gaussian_kernel(sigma_i)
+    #A_xx = sig.convolve2d(I_xx, kernel, mode='same')
+    #A_yy = sig.convolve2d(I_yy, kernel, mode='same')
+    #A_xy = sig.convolve2d(I_xy, kernel, mode='same')
+
     # Harris scores
     A_det = A_xx * A_yy - A_xy**2
     A_tr = A_xx + A_yy
     
+    # Harris-Stephens 1988
     #return A_det - alpha * A_tr**2
+    
+    # Harmonic mean (Brown-Szeliski-Winder 2005)
     return A_det / A_tr
 
-def get_best_scores(scores, n_points, border=10):
-    """
-    Border is minimum distance from image boundary
-    """
+def get_best_scores(scores, n_points, border=10, r_anms=20):
     # Mask out points too close to boundary
-    print scores.shape
     mask = np.zeros(scores.shape)
     mask[border:-border, border:-border] = 1
     scores *= mask
-    print scores.shape
 
-    # Sort by response strength
-    coords_sorted = np.array(np.unravel_index(np.argsort(scores, axis=None), scores.shape)).T
+    # Sort coordinates by response strength
+    coords_sorted_score = np.array(np.unravel_index(np.argsort(scores, axis=None), scores.shape)).T
+    #scores_sorted = scores[coords_sorted]
 
-    # TODO: implement ANMS (prevent dense clusters)
+    # Apply ANMS selection (prevent dense clusters)
+    supp_radii = get_suppression_radii(scores)
+    # Sort coordinates by supression radii
+    coords_sorted_supp = np.array(np.unravel_index(np.argsort(supp_radii, axis=None), supp_radii.shape)).T
 
-    # Get the best scores
-    best_coords = []
-    best_scores = []
-    for coord in coords_sorted[-n_points:]:
-        best_coords.append((coord[0], coord[1]))
-        best_scores.append(scores[coord[0], coord[1]])
+    # Get highest scores
+    #best_coords = coords_sorted_score[-n_points:]
 
-    return best_coords, best_scores
+    # Get scores with highest supression radii
+    best_coords = coords_sorted_supp[-n_points:]
+
+    best_scores = [scores[coord[0], coord[1]] for coord in best_coords]
+
+    return np.array(best_coords), np.array(best_scores)
+
+def get_suppression_radii(scores, c_robust=0.9):
+    supp_radii = np.zeros(scores.shape)
+
+    coords_max = np.unravel_index(scores.argmax(), scores.shape)
+
+    for i in range(scores.shape[0]):
+        for j in range(scores.shape[1]):
+
+            # Skip the highest score (infinite suppression radius)
+            if (i, j) == coords_max:
+                continue
+
+            # Find suppression radius
+            r = 0
+            r_found = False
+            score = scores[i][j]
+
+            while not r_found:
+                r += 1
+
+                # Keep the candidate "window" within the image
+                x0 = i-r   if i-r >= 0                else 0
+                x1 = i+r+1 if i+r+1 < scores.shape[0] else scores.shape[0]-1
+                y0 = j-r   if j-r >= 0                else 0
+                y1 = j+r+1 if j+r+1 < scores.shape[1] else scores.shape[1]-1
+
+                candidates = scores[x0:x1, y0:y1]
+                #if np.count_nonzero(score < c_robust*candidates):
+                if np.count_nonzero(score < candidates):
+                    r_found = True
+                    break
+            
+            supp_radii[i][j] = r
+
+    # Set the highest score to have the largest supression radius
+    supp_radii[coords_max] = supp_radii.max() + 1
+
+    return supp_radii

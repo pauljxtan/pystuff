@@ -5,88 +5,88 @@ import numpy as np
 import scipy.signal as sig
 import scipy.ndimage as ndi
 from compvis.utils import get_patch
-from compvis.imgproc.filters.kernels import KERNEL_GAUSSIAN, gaussian_kernel
 
 def sum_sq_diff(img_0, img_1, u, x, y, x_len, y_len):
     """
-    Finds the summed square difference between two image patches.
-    Uses even weighting across the patch.
+    Returns the summed square difference between two image patches, using even
+     weighting across the patch.
 
-    Parameters :
+    Parameters       :
         img_0, img_1 : two images being compared
-        u            : displacement vector between the patches
+        u            : displacement vector between patches
         x, y         : coordinates of top-left corner of first patch
-        x_len, y_len : width and height of first patch
+        x_len, y_len : dimensions of patch
     """
     patch_0 = get_patch(img_0, x, y, x_len, y_len)
     patch_1 = get_patch(img_1, x + u[0], y + u[1], x_len, y_len)
 
-    return (patch_1 - patch_0)**2).sum()
+    return ((patch_1 - patch_0)**2).sum()
 
 def autocorr(img, u, x, y, x_len, y_len):
     """
-    Computes the auto-correlation function for an image patch with a
+    Returns the auto-correlation function for an image patch with a
     displacement of u. Uses even weighting across the patch.
-    (Just for reference, since this is sum_sq_diff() with both images being
-    the same.)
+    (This function simply calls sum_sq_diff() with both images the same, and is
+    left here for reference/convenience.)
 
-    Parameters :
+    Parameters       :
         img          : image
-        u            : variation in position
+        u            : displacement vector between patches
         x, y         : coordinates of top-left corner of patch
-        x_len, y_len : width and height of patch
+        x_len, y_len : dimensions of patch
     """
     return sum_sq_diff(img, img, u, x, y, x_len, y_len)
 
 def autocorr_surface(img, u_x_range, u_y_range, x, y, x_len, y_len):
     """
-    Computes an auto-correlation surface for an image patch with a given range
+    Returns an auto-correlation surface for an image patch with a given range
     of displacements.
 
-    Parameters :
+    Parameters               :
         img                  : image
-        u_x_range, u_y_range : range of displacements (tuples)
+        u_x_range, u_y_range : ranges of displacements (tuples)
         x, y                 : coordinates of top-left corner of patch
-        x_len, y_len         : width and height of patch
+        x_len, y_len         : dimensions of patch
 
     Returns :
-        X, Y : grid mesh
-        Z    : auto-correlation values
+        surface : auto-correlation values
+        X, Y    : grid mesh
     """
+    # Grid mesh
     X, Y = np.meshgrid(range(u_x_range[0], u_x_range[1]),
                        range(u_y_range[0], u_y_range[1]))
 
-    z = np.array([autocorr(img, (u_x, u_y), x, y, x_len, y_len) 
+    # Auto-correlation surfacae
+    s = np.array([autocorr(img, (u_x, u_y), x, y, x_len, y_len) 
                   for u_x, u_y in zip(np.ravel(X), np.ravel(Y))])
-    Z = z.reshape(X.shape)
+    surface = s.reshape(X.shape)
 
-    return X, Y, Z
+    return surface, X, Y
 
 def harris(img, sigma_d=1, sigma_i=2, alpha=0.06, filter_type='gaussian'):
     """
-    Returns the Harris interest scores for keypoint detection.
+    Returns the Harris interest scores for corner detection.
 
-    Parameters :
+    Parameters      :
         img         : image
         sigma_d     : width of derivative Gaussian
         sigma_i     : width of integration Gaussian
-        alpha       : parameter used in Harris-Stephens (1988) score
+        alpha       : parameter in Harris-Stephens (1988) score
         filter_type : 'gaussian' or 'sobel'
 
     (Default values for sigma_d and sigma_i from Szeliski pp. 190)
     (Default value for alpha from Szeliski pp. 189)
     """
-    # Gradients in x and y
-
+    #--- Gradients in x and y
     # Derivative of Gaussian
     if filter_type is 'gaussian':
         I_x = ndi.gaussian_filter(img, sigma_d, (1, 0))#, mode='nearest')
         I_y = ndi.gaussian_filter(img, sigma_d, (0, 1))#, mode='nearest')
-
     # Sobel
     elif filter_type is 'sobel':
         I_x = ndi.sobel(img, 0)
         I_y = ndi.sobel(img, 1)
+    #---
 
     # Outer products
     I_xx = I_x**2
@@ -112,12 +112,11 @@ def select_scores(scores, n_points, border=10):
     """
     Selects the best scores from a given map.
 
-    Parameters :
+    Parameters   :
         scores   : 2D score array
         n_points : number of points to select
         border   : minimum distance from image boundaries
     """
-
     # Mask out points too close to boundary
     mask = np.zeros(scores.shape)
     mask[border:-border, border:-border] = 1
@@ -142,6 +141,7 @@ def select_scores(scores, n_points, border=10):
 
     return np.array(best_coords), np.array(best_scores)
 
+# TODO: Fix this
 def get_suppression_radii(scores, c_robust=0.9):
     supp_radii = np.zeros(scores.shape)
 

@@ -1,5 +1,5 @@
 """
-Feature detectors (Szeliski 4.1.1)
+Feature detection (Szeliski 4.1.1)
 """
 import numpy as np
 import scipy.signal as sig
@@ -21,7 +21,7 @@ def sum_sq_diff(img_0, img_1, u, x, y, x_len, y_len):
     patch_0 = get_patch(img_0, x, y, x_len, y_len)
     patch_1 = get_patch(img_1, x + u[0], y + u[1], x_len, y_len)
 
-    return np.sum((patch_1 - patch_0)**2)
+    return (patch_1 - patch_0)**2).sum()
 
 def autocorr(img, u, x, y, x_len, y_len):
     """

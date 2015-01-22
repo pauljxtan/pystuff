@@ -6,8 +6,9 @@ This library is mostly for my own learning purposes, since I find I understand c
 
 ### Modules ###
 * __examples__: Example scripts
-* __feature__: Feature detection and matching
-  * __detectors.py__: Feature detectors
+  * __blend_orapple.py__: Blends an apple and orange using image pyramids
+* __feature__: Feature detection and matching (Szeliski chapter 4)
+  * __detect.py__: Feature detection
 * __imgform__: Image formation (Szeliski chapter 2)
   * __color.py__: Color spaces
   * __transforms.py__: Geometric transformations

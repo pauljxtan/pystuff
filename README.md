@@ -7,8 +7,10 @@ This library is mostly for my own learning purposes, since I find I understand c
 ### Modules ###
 * __examples__: Example scripts
   * __blend_orapple.py__: Blends an apple and orange using image pyramids
+  * __match_features.py__: Matches Harris features in two images
 * __feature__: Feature detection and matching (Szeliski chapter 4)
-  * __detect.py__: Feature detection
+  * __detectors.py__: Feature detectors
+  * __descriptors.py__ : Feature descriptors
 * __imgform__: Image formation (Szeliski chapter 2)
   * __color.py__: Color spaces
   * __transforms.py__: Geometric transformations
@@ -25,3 +27,7 @@ This library is mostly for my own learning purposes, since I find I understand c
 ### Dependencies ###
 * __numpy__
 * __scipy__
+
+For example scripts only:
+* __matplotlib__
+* __PIL__ (Python imaging library)

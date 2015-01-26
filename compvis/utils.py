@@ -41,6 +41,12 @@ def get_patch(img, x, y, x_len, y_len):
     """
     return img[x : x + x_len, y : y + y_len]
 
+def get_patch_centered(img, x, y, radius):
+    """
+    Extracts a patch from an image centered at (x, y) with a given radius.
+    """
+    return img[x - radius : x + radius + 1, y - radius : y + radius + 1]
+
 def get_mask(img, x, y, x_len, y_len):
     """
     Returns a binary mask with top-left corner at (x, y) and

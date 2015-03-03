@@ -30,4 +30,10 @@ This library is mostly for my own learning purposes, since I find I understand c
 
 For example scripts only:
 * __matplotlib__
-* __PIL__ (Python imaging library)
+* __PIL__ (Python Imaging Library)
+
+### Notes ###
+Don't forget to add the library to your python path, e.g.
+```bash
+$ export PYTHONPATH=$PYTHONPATH:/path/to/compvis
+```

@@ -6,12 +6,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 
-from compvis.feature.detectors import harris, select_scores
+from compvis.feature.detectors import harris, select_scores, select_scores_anms
 from compvis.feature.descriptors import match_points
 
 print "Creating images..."
 obj = np.array(Image.open("ai_160.png").convert('L'))
-
 # Place the object at different positions in each image
 img_0 = np.ones((320, 320), dtype=np.int64) * 255
 img_1 = np.ones((320, 320), dtype=np.int64) * 255
@@ -25,8 +24,13 @@ scores_0 = harris(img_0)
 scores_1 = harris(img_1)
 
 print "Selecting corner detections..."
-coords_0, scores_0 = select_scores(scores_0, 128)
-coords_1, scores_1 = select_scores(scores_1, 128)
+# Without ANMS
+#coords_0, scores_0 = select_scores(scores_0, 64)
+#coords_1, scores_1 = select_scores(scores_1, 64)
+
+# With ANMS
+coords_0, scores_0 = select_scores_anms(scores_0, 64, 1.0)
+coords_1, scores_1 = select_scores_anms(scores_1, 64, 1.0)
 
 print "Matching features..."
 matches = match_points(img_0, img_1, coords_0, coords_1)
@@ -54,4 +58,3 @@ for i, m in enumerate(matches):
              (coords_0[i][0], coords_1[m][0]), 'o-', linewidth=1)
 
 plt.show()
-

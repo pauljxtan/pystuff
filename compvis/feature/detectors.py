@@ -126,38 +126,60 @@ def select_scores(scores, n_points, border=10):
     coords_sorted_score = np.array(np.unravel_index(np.argsort(scores, axis=None), scores.shape)).T
     #scores_sorted = scores[coords_sorted]
 
-    # Apply ANMS selection (prevent dense clusters)
-    #supp_radii = get_suppression_radii(scores)
-    # Sort coordinates by supression radii
-    #coords_sorted_supp = np.array(np.unravel_index(np.argsort(supp_radii, axis=None), supp_radii.shape)).T
-
     # Get highest scores
     best_coords = coords_sorted_score[-n_points:]
-
-    # Get scores with highest supression radii
-    #best_coords = coords_sorted_supp[-n_points:]
 
     best_scores = [scores[coord[0], coord[1]] for coord in best_coords]
 
     return np.array(best_coords), np.array(best_scores)
 
-# TODO: Fix this
-def get_suppression_radii(scores, c_robust=0.9):
+def select_scores_anms(scores, n_points, c_robust=0.9, border=10):
+    """
+    Selects the best scores from a given map, applying adaptive non-maximal
+    supression.
+
+    Parameters   :
+        scores   : 2D score array
+        n_points : number of points to select
+        c_robust : robustifying parameter
+        border   : minimum distance from image boundaries
+    """
+    # Mask out points too close to boundary
+    mask = np.zeros(scores.shape)
+    mask[border:-border, border:-border] = 1
+    scores *= mask
+
+    # Apply ANMS selection (prevent dense clusters)
+    supp_radii = get_suppression_radii(scores, c_robust)
+    # Sort coordinates by supression radii
+    coords_sorted_supp = np.array(np.unravel_index(np.argsort(supp_radii, axis=None), supp_radii.shape)).T
+
+    # Get scores with highest supression radii
+    best_coords = coords_sorted_supp[-n_points:]
+
+    best_scores = [scores[coord[0], coord[1]] for coord in best_coords]
+
+    return np.array(best_coords), np.array(best_scores)
+
+def get_suppression_radii(scores, c_robust):
     supp_radii = np.zeros(scores.shape)
 
-    coords_max = np.unravel_index(scores.argmax(), scores.shape)
+    # Coordinate with highest score
+    coord_max = np.unravel_index(scores.argmax(), scores.shape)
 
     for i in range(scores.shape[0]):
         for j in range(scores.shape[1]):
+            score = scores[i, j]
+            if score == 0:
+                continue
 
             # Skip the highest score (infinite suppression radius)
-            if (i, j) == coords_max:
+            if (i, j) == coord_max:
                 continue
 
             # Find suppression radius
             r = 0
             r_found = False
-            score = scores[i][j]
 
             while not r_found:
                 r += 1
@@ -169,14 +191,14 @@ def get_suppression_radii(scores, c_robust=0.9):
                 y1 = j+r+1 if j+r+1 < scores.shape[1] else scores.shape[1]-1
 
                 candidates = scores[x0:x1, y0:y1]
-                #if np.count_nonzero(score < c_robust*candidates):
-                if np.count_nonzero(score < candidates):
+                # If a significantly stronger neighbour is found
+                if np.count_nonzero(score < c_robust*candidates):
                     r_found = True
                     break
             
             supp_radii[i][j] = r
 
     # Set the highest score to have the largest supression radius
-    supp_radii[coords_max] = supp_radii.max() + 1
+    supp_radii[coord_max] = supp_radii.max() + 1
 
     return supp_radii

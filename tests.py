@@ -209,6 +209,27 @@ class YakuTests(unittest.TestCase):
         random.shuffle(tiles)
         self.assertFalse(yaku.is_kokushi(tiles))
 
+    def test_is_chinitsu(self):
+        groups = [Pair(ManTile(2)), Sequence(ManTile(5)), Sequence(ManTile(6)),
+                  Triplet(ManTile(9)), Triplet(ManTile(3))]
+        random.shuffle(groups)
+        self.assertTrue(yaku.is_chinitsu(groups))
+
+        groups = [Pair(PinTile(7)), Sequence(PinTile(3)), Sequence(PinTile(5)),
+                  Triplet(PinTile(1)), Triplet(PinTile(8))]
+        random.shuffle(groups)
+        self.assertTrue(yaku.is_chinitsu(groups))
+
+        groups = [Pair(SouTile(3)), Sequence(SouTile(1)), Sequence(SouTile(7)),
+                  Triplet(SouTile(2)), Triplet(SouTile(5))]
+        random.shuffle(groups)
+        self.assertTrue(yaku.is_chinitsu(groups))
+
+        groups = [Pair(SouTile(1)), Sequence(SouTile(6)), Sequence(PinTile(3)),
+                  Triplet(SouTile(7)), Triplet(SouTile(8))]
+        random.shuffle(groups)
+        self.assertFalse(yaku.is_chinitsu(groups))
+
 TEST_CASES = (TypeTests, YakuTests)
 
 def suite():

@@ -1,6 +1,6 @@
 from tile import (NumberedTile, ManTile, PinTile, SouTile, WindTile,
                   DragonTile, TERMINALS, HONOURS, WIND_TILES, DRAGONS,
-                  NUMBERS, Sequence, Pair, Triplet)
+                  NUMBERS, SUITS, NUMBERED_TILE_TYPES, Sequence, Pair, Triplet)
 from utils import (flatten_groups, group_concealed_tiles_and_convert,
                    get_sequences, get_triplets, get_quadruplets, get_plets,
                    get_suit_counts_groups)
@@ -107,13 +107,14 @@ def is_ryanpeikou(groups):
                 for sequence in set(sequences)]) == 2
 
 def is_honitsu(groups):
-    return
+    return not is_chinitsu(groups) and True # TODO
 
 def is_junchan(groups):
     return
 
 def is_chinitsu(groups):
-    return
+    tiles = flatten_groups(groups)
+    return any([all([isinstance(tile, numbered_tile) for tile in tiles]) for numbered_tile in NUMBERED_TILE_TYPES])
 
 #### Yakuman
 

@@ -1,3 +1,5 @@
+"BST: Binary search tree"
+
 class BST(object):
     """
     A binary search tree.
@@ -12,7 +14,6 @@ class BST(object):
         """
         self._root._insert(value)
 
-    # TODO: can we use decorators here?
     def traverse_preorder(self, visit_func):
         """
         Traverses the tree in pre-order fashion, applying the given function to
@@ -38,6 +39,14 @@ class BST(object):
         if self._root._value:
             return self._root._traverse_postorder(visit_func)
 
+    def search(self, value):
+        """
+        Searches the tree for the given value, and returns True if the value is
+        found; otherwise, returns False.
+        """
+        if self._root._value:
+            return self._root._search(value)
+
 class _BSTNode(object):
     """
     A node in a binary search tree.
@@ -53,28 +62,59 @@ class _BSTNode(object):
         """
         Inserts a value into the tree rooted by this node.
         """
-        # If current node has a value, look down the tree
-        if self._value:
-            if value < self._value:
-                # If node exists, recursively insert value on left subtree
-                if self._left:
-                    self._left._insert(value)
-                # Otherwise, create new node and add as left child
-                else:
-                    self._left = _BSTNode(value)
-            elif value > self._value:
-                # If node exists, recursively insert value on right subtree
-                if self._right:
-                    self._right._insert(value)
-                # Otherwise, create new node and add as right child
-                else:
-                    self._right = _BSTNode(value)
-            # Value already exists
-            else:
-                raise ValueError("Value (%d) already in tree" % value)
-        # Otherwise, simply set this node to the value
-        else:
+        # If current node has no value, simply set it on this node
+        if not self._value:
             self._value = value
+            return
+        
+        if self._value == value:
+            raise ValueError("Value (%d) already in tree" % value)
+
+        # Go down the left subtree
+        if value < self._value:
+            # If node exists, recursively insert value on left subtree
+            if self._left:
+                self._left._insert(value)
+            # Otherwise, create new node and add as left child
+            else:
+                self._left = _BSTNode(value)
+                return
+
+        # Go down the right subtree
+        if value > self._value:
+            # If node exists, recursively insert value on right subtree
+            if self._right:
+                self._right._insert(value)
+            # Otherwise, create new node and add as right child
+            else:
+                self._right = _BSTNode(value)
+                return
+
+    def _search(self, value):
+        """
+        Searches the tree rooted by this node for the given value, and returns
+        True if the value is found; otherwise, returns False.
+        """
+        if not self._value:
+            # Not found
+            return False
+
+        if value < self._value:
+            if not self._left:
+                # Not found
+                return False
+            # Search the left subtree
+            return self._left._search(value)
+
+        if value > self._value:
+            if not self._right:
+                # Not found
+                return False
+            # Search the left subtree
+            return self._right._search(value)
+           
+        # Found
+        return True
 
     def _traverse_preorder(self, visit_func):
         """

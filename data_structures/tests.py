@@ -41,5 +41,10 @@ class TestDataStructures(unittest.TestCase):
         self.assertEqual(generator_postorder.next(), 7)
         self.assertEqual(generator_postorder.next(), 5)
 
+        self.assertFalse(tree.search(1))
+        self.assertTrue(tree.search(3))
+        self.assertTrue(tree.search(7))
+        self.assertFalse(tree.search(9))
+
 if __name__ == '__main__':
     unittest.main()

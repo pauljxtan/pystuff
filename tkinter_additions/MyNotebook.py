@@ -1,13 +1,17 @@
-"""MyNotebook: ttk.Notebook with bells and whistles"""
+"""MyNotebook: A small wrapper around ttk.Notebook with a context menu for closing tabs."""
 
 import Tkinter as tk
 import ttk
 
 class MyNotebook(ttk.Frame): # pylint: disable=too-many-ancestors
     """
-    A wrapper around ttk.Notebook that adds more bells and whistles.
+    A small wrapper around ttk.Notebook with a context menu for closing tabs.
     """
     def __init__(self, parent, **kw):
+        """
+        :param parent: The parent widget
+        :type parent: Tkinter.Widget
+        """
         ttk.Frame.__init__(self, parent)
         self._notebook = ttk.Notebook(self, **kw)
         self._notebook.pack()
@@ -45,10 +49,11 @@ class MyNotebook(ttk.Frame): # pylint: disable=too-many-ancestors
 
 if __name__ == '__main__':
     root = tk.Tk()
+    root.geometry("320x320")
 
     my_notebook = MyNotebook(root)
     my_notebook.pack()
 
-    my_notebook.add_tab(ttk.Label(text="Content"), "label")
+    my_notebook.add_tab(ttk.Label(text="Content"), "Label")
     
     root.mainloop()

@@ -116,6 +116,12 @@ class _BSTNode(object):
         # Found
         return True
 
+    def _delete(self, value):
+        """
+        Deletes the given value from the tree rooted by this node if it exists.
+        """
+        raise NotImplementedError()     
+
     def _traverse_preorder(self, visit_func):
         """
         Traverses the tree rooted by this node in pre-order fashion, applying

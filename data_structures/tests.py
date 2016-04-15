@@ -1,7 +1,7 @@
 import random
 import unittest
 
-from data_structures import bst
+from data_structures import bst, stack
 
 class TestDataStructures(unittest.TestCase):
     def test_BST(self):
@@ -45,6 +45,33 @@ class TestDataStructures(unittest.TestCase):
         self.assertTrue(tree.search(3))
         self.assertTrue(tree.search(7))
         self.assertFalse(tree.search(9))
+
+    def test_Stack(self):
+        stk = stack.Stack()
+
+        self.assertTrue(stk.is_empty())
+
+        items = (9, 1, 8, 2, 7, 3)
+
+        for item in items:
+            stk.push(item)
+
+        self.assertFalse(stk.is_empty())
+
+        self.assertEqual(stk.size(), 6)
+
+        self.assertEqual(stk.pop(), 3)
+
+        self.assertEqual(stk.size(), 5)
+
+        self.assertEqual(stk.peek(), 7)
+
+        self.assertEqual(stk.size(), 5)
+
+        self.assertEqual(stk.search(7), 0)    
+        self.assertEqual(stk.search(8), 2)    
+        self.assertEqual(stk.search(9), 4)
+        self.assertEqual(stk.search(5), -1)
 
 if __name__ == '__main__':
     unittest.main()

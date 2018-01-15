@@ -1,6 +1,6 @@
 import unittest
 
-from pyexchange.exchange import Exchange
+from pyexchange.exchange import Exchange, ExchangeReporter
 
 
 class TestExchange(unittest.TestCase):
@@ -42,6 +42,28 @@ class TestExchange(unittest.TestCase):
         self.assertEqual(len(exchange.asks), 3)
         self.assertEqual(len(exchange.transactions), 5)
         self.assertEqual(exchange.bids[-1].units, 3)
+
+
+class TestExchangeReporter(unittest.TestCase):
+    def test_spread(self):
+        exchange = Exchange()
+
+        self.assertEqual(ExchangeReporter.spread(exchange), None)
+
+        exchange.ask(1, 103)
+        self.assertEqual(ExchangeReporter.spread(exchange), None)
+
+        exchange.bid(1, 97)
+        self.assertEqual(ExchangeReporter.spread(exchange), 6)
+
+        exchange.ask(1, 99)
+        self.assertEqual(ExchangeReporter.spread(exchange), 2)
+
+        exchange.bid(1, 98)
+        self.assertEqual(ExchangeReporter.spread(exchange), 1)
+
+        exchange.bid(1, 99)
+        self.assertEqual(ExchangeReporter.spread(exchange), 5)
 
 
 

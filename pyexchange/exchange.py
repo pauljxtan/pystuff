@@ -1,6 +1,5 @@
-"""A simple toy exchange on which a commodity is bought and sold."""
-
 # TODO:
+# -- Report spread, volume, moving average, etc.
 # -- Add buyer/seller objects
 # -- Add multiprocessing
 # -- Order expiry
@@ -9,6 +8,8 @@ from datetime import datetime
 
 
 class Exchange(object):
+    """A simple toy exchange on which a commodity is bought and sold."""
+
     def __init__(self):
         self.bids = []
         self.asks = []
@@ -73,6 +74,15 @@ class Exchange(object):
     def _remove_filled_orders(self):
         self.bids = list(filter(lambda bid: bid.units > 0, self.bids))
         self.asks = list(filter(lambda ask: ask.units > 0, self.asks))
+
+
+class ExchangeReporter(object):
+    @classmethod
+    def spread(cls, exchange):
+        """Returns the spread between the highest bid and lowest ask."""
+        if len(exchange.asks) == 0 or len(exchange.bids) == 0:
+            return None
+        return exchange.asks[0].price - exchange.bids[0].price
 
 
 class Order(object):
